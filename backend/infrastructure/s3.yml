@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  SpeakWriteUploadBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'speakwrite-upload-bucket'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  SpeakWriteTranscriptionBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'speakwrite-transcription-bucket'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  SpeakWriteWebsiteBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'speakwrite-website-bucket'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  SpeakWriteWebsiteBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref SpeakWriteWebsiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref SpeakWriteWebsiteBucket
+                - '/*'
+
+Outputs:
+  UploadBucketName:
+    Description: 'Name of the S3 bucket for uploading audio files'
+    Value: !Ref SpeakWriteUploadBucket
+
+  TranscriptionBucketName:
+    Description: 'Name of the S3 bucket for storing transcriptions'
+    Value: !Ref SpeakWriteTranscriptionBucket
+
+  WebsiteBucketName:
+    Description: 'Name of the S3 bucket for hosting the website'
+    Value: !Ref SpeakWriteWebsiteBucket
+
+  WebsiteURL:
+    Description: 'URL of the S3 bucket website'
+    Value: !GetAtt SpeakWriteWebsiteBucket.WebsiteURL
